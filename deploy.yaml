@@ -30,6 +30,10 @@ spec:
     # This is optional since cert-manager will default to this value however
     # if you are using an external issuer, change this to that issuer group.
     group: cert-manager.io
+  template:
+    spec:
+      containers:
+        - image: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.0
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
