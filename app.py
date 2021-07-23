@@ -2,13 +2,13 @@
 import base64
 import json
 import logging
-
 # from authlib import BadSignatureError
 import os
+import queue
 import sys
-from pprint import pprint
 import time
 from datetime import date
+from pprint import pprint
 
 import dateutil.parser
 import requests
@@ -17,14 +17,66 @@ from flask import Flask, abort, jsonify, request
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from splunk_hec import splunk_hec
-import queue
-
 app = Flask(__name__)
 
 gunicorn_error_logger = logging.getLogger("gunicorn.error")
 app.logger.handlers.extend(gunicorn_error_logger.handlers)
 app.logger.setLevel(logging.DEBUG)
+
+
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(408, 500, 502, 503, 504),
+    session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+        method_whitelist=frozenset(
+            ["HEAD", "TRACE", "GET", "PUT", "OPTIONS", "DELETE", "POST"]
+        ),
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
+def send_event(
+    http_event_collector_host,
+    http_event_collector_port,
+    http_event_collector_key,
+    event,
+):
+    try:
+
+        if (
+            http_event_collector_host == "unknown"
+            or http_event_collector_key == "unknown"
+        ):
+            abort(400)
+
+        protocol = "https"
+        input_url = "/event"
+        server_uri = "%s://%s:%s/services/collector%s" % (
+            protocol,
+            http_event_collector_host,
+            http_event_collector_port,
+            input_url,
+        )
+        headers = {"Authorization": "Splunk " + http_event_collector_key}
+
+        response = requests_retry_session().post(
+            server_uri, data="\n".join(event), headers=headers, verify=False
+        )
+        app.logger.info(f"Response {response}")
+    except Exception as e:
+        app.log_exception(e)
 
 
 @app.route("/", methods=["POST"])
@@ -50,46 +102,30 @@ def event():
     else:
         return jsonify({"message": "ERROR: Unauthorized no bearer token"}), 401
 
-    splhec = splunk_hec(
-        token=claims["hec_token"],
-        hec_server=claims["hec_server"],
-        hec_port=claims["hec_port"],
-        input_type="json",
-        use_hec_tls=True,
-        hec_tls_verify=False,
-        max_content_length=1500000,
-        rotate_session_after=60,
-        max_threads=1,
-        disable_tls_validation_warnings=True,
-        debug_enabled=True,
-    )
-    splhec.backup_queue = queue.Queue(0)
-
     batch = request.get_json()
     # pprint(json.loads(base64.b64decode(batch["records"][0]["data"])))
+    events = []
     for record in batch["records"]:
         data = record["data"]
         decodedBytes = base64.b64decode(data)
         event = json.loads(decodedBytes)
         payload = {}
-        #ISO Date parse is potentially complex not easily done on props
-        payload["time"] = dateutil.parser.isoparse(event["detail"]["eventTime"]).timestamp()
+        # ISO Date parse is potentially complex not easily done on props
+        payload["time"] = dateutil.parser.isoparse(
+            event["detail"]["eventTime"]
+        ).timestamp()
         # payload['source'] = source
         payload["index"] = "main"
         payload["sourcetype"] = "aws:cloudtrail"
-        payload["source"] ="aws_firehose_cloudtrail"
-        payload["host"] = event['detail']['eventSource']
-        #Today we use an expensive regex per event using json object is faster and offloads from idx
-        payload["event"] = event['detail']
+        payload["source"] = "aws_firehose_cloudtrail"
+        payload["host"] = event["detail"]["eventSource"]
+        # Today we use an expensive regex per event using json object is faster and offloads from idx
+        payload["event"] = event["detail"]
         payload = json.dumps(payload)
+        events.append(payload)
 
-        splhec.send_event(payload)
+    send_event(claims["hec_server"], claims["hec_port"], claims["hec_token"], events)
 
-    # Check the backup queue
-    if not splhec.backup_queue.empty():
-       raise RuntimeError('Failures detected. Implement backup routine here.')
-
-    splhec.stop_threads_and_processing()
     return "OK"
 
 
