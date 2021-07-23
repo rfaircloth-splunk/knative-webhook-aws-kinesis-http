@@ -8,7 +8,6 @@ authors = ["rfaircloth-splunk <rfaircloth@splunk.com>"]
 python = "^3.7"
 Flask = "^2.0.1"
 requests = "^2.26.0"
-gunicorn = "^20.1.0"
 Authlib = "^0.15.4"
 python-dateutil = "^2.8.2"
 opentelemetry-api = "^1.4.0"

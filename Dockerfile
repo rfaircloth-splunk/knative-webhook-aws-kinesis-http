@@ -5,13 +5,15 @@ FROM python:3.7-slim
 # Allow statements and log messages to immediately appear in the Knative logs
 ENV PYTHONUNBUFFERED True
 
+RUN pip install poetry gunicorn
 # Copy local code to the container image.
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
 
 # Install production dependencies.
-RUN pip install Flask gunicorn
+RUN poetry export >/tmp/requirements.txt ;\
+    pip install -r /tmp/requirements.txt 
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
