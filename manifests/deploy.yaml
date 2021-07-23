@@ -8,11 +8,13 @@ metadata:
     app.kubernetes.io/version: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v
     app.kubernetes.io/component: front-end
     app.kubernetes.io/part-of: webhook-gateway
+    app:
+      kubernetes.io/version: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.6
 spec:
   template:
     spec:
       containers:
-        - image: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.5
+        - image: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.6
           volumeMounts:
             - name: webhook-signing
               mountPath: "/app/.certs"
