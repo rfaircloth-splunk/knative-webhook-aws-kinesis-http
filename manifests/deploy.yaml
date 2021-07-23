@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       containers:
-        - image: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.0
+        - image: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.5
           volumeMounts:
             - name: webhook-signing
               mountPath: "/app/.certs"
