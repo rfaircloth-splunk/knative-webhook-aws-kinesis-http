@@ -41,10 +41,10 @@ spec:
     spec:
       containers:
         - image: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.0
-      volumeMounts:
-      - name: foo
-        mountPath: "/app/.certs"
-        readOnly: true
+          volumeMounts:
+          - name: foo
+            mountPath: "/app/.certs"
+            readOnly: true
     volumes:
     - name: webhook-signing
       secret:
