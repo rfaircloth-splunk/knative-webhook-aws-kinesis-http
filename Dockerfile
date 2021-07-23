@@ -5,7 +5,7 @@ FROM python:3.7-slim
 # Allow statements and log messages to immediately appear in the Knative logs
 ENV PYTHONUNBUFFERED True
 
-RUN pip install poetry gunicorn
+RUN pip install poetry
 # Copy local code to the container image.
 ENV APP_HOME /app
 WORKDIR $APP_HOME
