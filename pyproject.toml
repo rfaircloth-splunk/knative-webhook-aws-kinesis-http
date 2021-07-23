@@ -11,6 +11,12 @@ requests = "^2.26.0"
 gunicorn = "^20.1.0"
 Authlib = "^0.15.4"
 python-dateutil = "^2.8.2"
+opentelemetry-api = "^1.4.0"
+opentelemetry-sdk = "^1.4.0"
+opentelemetry-instrumentation-requests = "^0.23b0"
+opentelemetry-instrumentation-wsgi = "^0.23b0"
+opentelemetry-instrumentation = "^0.23b0"
+opentelemetry-instrumentation-flask = "^0.23b0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.7b0"
