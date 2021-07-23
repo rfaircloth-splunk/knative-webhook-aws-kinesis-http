@@ -72,14 +72,22 @@ def event():
         decodedBytes = base64.b64decode(data)
         event = json.loads(decodedBytes)
         payload = {}
-        payload["event"] = event
+        #ISO Date parse is potentially complex not easily done on props
         payload["time"] = dateutil.parser.isoparse(event["detail"]["eventTime"]).timestamp()
         # payload['source'] = source
         payload["index"] = "main"
-        payload["sourcetype"] = "aws:kinesis:generic"
+        payload["sourcetype"] = "aws:cloudtrail"
+        payload["source"] ="aws_firehose_cloudtrail"
+        payload["host"] = event['detail']['eventSource']
+        #Today we use an expensive regex per event using json object is faster and offloads from idx
+        payload["event"] = event['detail']
         payload = json.dumps(payload)
 
         splhec.send_event(payload)
+
+    # Check the backup queue
+    if not splhec.backup_queue.empty():
+       raise RuntimeError('Failures detected. Implement backup routine here.')
 
     splhec.stop_threads_and_processing()
     return "OK"
