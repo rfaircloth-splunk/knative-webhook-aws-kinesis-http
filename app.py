@@ -12,6 +12,7 @@ from datetime import date
 from pprint import pprint
 
 import dateutil.parser
+from flask.helpers import make_response
 import requests
 from authlib.jose import JsonWebToken
 from flask import Flask, abort, jsonify, request
@@ -160,7 +161,7 @@ def event():
                 claims["hec_server"], claims["hec_port"], claims["hec_token"], events
             )
 
-    return "OK"
+    return make_response("OK", 200)
 
 
 if __name__ == "__main__":

@@ -52,7 +52,7 @@ jobs:
         id: docker_action_meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/rfaircloth-splunk/knative-webhook-generic-json
+          images: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http
           tags: |
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}
