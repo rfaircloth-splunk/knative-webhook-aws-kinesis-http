@@ -107,7 +107,7 @@ def event():
         kind=trace.SpanKind.SERVER,
         attributes=collect_request_attributes(request.environ),
     ):
-        text_file = open(".certs/public.key", "r")
+        text_file = open(".certs/tls.crt", "r")
         pem_public = text_file.read()
         text_file.close()
 
