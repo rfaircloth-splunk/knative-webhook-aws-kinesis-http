@@ -11,7 +11,7 @@
         "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
         ["@semantic-release/exec", {
-            "prepareCmd": 'yq -i eval ".spec.template.spec.containers[0].image = \"ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v${nextRelease.version}\"" manifests/deploy.yaml'
+            "prepareCmd": 'yq -i eval ".spec.template.spec.containers[0].image = \"ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v${nextRelease.version}\"" manifests/deploy.yaml;yq -i eval ".metadata.labels.app.\"kubernetes.io/version\" = \"ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v${nextRelease.version}\"" manifests/deploy.yaml'
         }],
         ["@semantic-release/git", {
             "assets": ["manifests/deploy.yaml"],

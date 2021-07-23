@@ -3,6 +3,11 @@ kind: Service
 metadata:
   name: knative-webhook-kinesis-http
   namespace: default
+  labels:
+    app.kubernetes.io/name: webhook-kinesis-http
+    app.kubernetes.io/version: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v
+    app.kubernetes.io/component: front-end
+    app.kubernetes.io/part-of: webhook-gateway
 spec:
   template:
     spec:
@@ -16,3 +21,8 @@ spec:
         - name: webhook-signing
           secret:
             secretName: webhook-signing
+metadata\:
+  labels\:
+    app\:
+      kubernetes\:
+        io/version: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v

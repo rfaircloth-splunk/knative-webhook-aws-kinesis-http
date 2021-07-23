@@ -2,7 +2,6 @@
 import base64
 import json
 import logging
-
 # from authlib import BadSignatureError
 import os
 import queue
@@ -12,21 +11,18 @@ from datetime import date
 from pprint import pprint
 
 import dateutil.parser
-from flask.helpers import make_response
 import requests
 from authlib.jose import JsonWebToken
 from flask import Flask, abort, jsonify, request
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
-
+from flask.helpers import make_response
 from opentelemetry import trace
 from opentelemetry.instrumentation.wsgi import collect_request_attributes
 from opentelemetry.propagate import extract
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,
-    ConsoleSpanExporter,
-)
+from opentelemetry.sdk.trace.export import (BatchSpanProcessor,
+                                            ConsoleSpanExporter)
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 app = Flask(__name__)
 
@@ -41,7 +37,6 @@ tracer = trace.get_tracer_provider().get_tracer(__name__)
 trace.get_tracer_provider().add_span_processor(
     BatchSpanProcessor(ConsoleSpanExporter())
 )
-
 
 
 def requests_retry_session(
