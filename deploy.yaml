@@ -45,7 +45,7 @@ spec:
           - name: foo
             mountPath: "/app/.certs"
             readOnly: true
-    volumes:
-    - name: webhook-signing
-      secret:
-        secretName: webhook-signing
+      volumes:
+      - name: webhook-signing
+        secret:
+          secretName: webhook-signing
