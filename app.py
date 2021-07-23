@@ -2,6 +2,7 @@
 import base64
 import json
 import logging
+
 # from authlib import BadSignatureError
 import os
 import queue
@@ -19,8 +20,7 @@ from opentelemetry import trace
 from opentelemetry.instrumentation.wsgi import collect_request_attributes
 from opentelemetry.propagate import extract
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (BatchSpanProcessor,
-                                            ConsoleSpanExporter)
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -107,21 +107,17 @@ def event():
         text_file.close()
 
         headers = request.headers
-        auth = headers.get("Authorization")
+        encoded = headers.get("X-Amz-Firehose-Access-Key")
 
-        if auth.startswith("Bearer "):
-            encoded = auth.split(" ")[1]
-            try:
-                jwt = JsonWebToken(["ES256", "ES384", "ES512"])
-                claims = jwt.decode(encoded, pem_public)
-            except Exception:
-                e = sys.exc_info()[0]
-                app.log_exception(e)
-                return jsonify({"message": "ERROR: Unauthorized"}), 401
+        try:
+            jwt = JsonWebToken(["ES256", "ES384", "ES512"])
+            claims = jwt.decode(encoded, pem_public)
+        except Exception:
+            e = sys.exc_info()[0]
+            app.log_exception(e)
+            return jsonify({"message": "ERROR: Unauthorized"}), 401
 
-            app.logger.debug(claims)
-        else:
-            return jsonify({"message": "ERROR: Unauthorized no bearer token"}), 401
+        app.logger.debug(claims)
 
         batch = request.get_json()
         # pprint(json.loads(base64.b64decode(batch["records"][0]["data"])))
