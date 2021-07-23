@@ -8,8 +8,6 @@ metadata:
     app.kubernetes.io/version: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v
     app.kubernetes.io/component: front-end
     app.kubernetes.io/part-of: webhook-gateway
-    app:
-      kubernetes.io/version: ghcr.io/rfaircloth-splunk/knative-webhook-kinesis-http:v1.0.9
 spec:
   template:
     spec:
